@@ -3,9 +3,10 @@ body {
     margin: 0;
     padding: 0;
     display: flex;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
-    height: 50vh;
+
 }
 
 body::before {
@@ -25,7 +26,7 @@ body::before {
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 100vh;
+    height: 50vh;
 }
 
 .content h3 {
@@ -63,8 +64,15 @@ body::before {
 }
 
 .results {
+    margin-top: 10px;
     display: flex;
-    padding: 10px;
+    gap: 5px;
+    background-color: rgb(71, 60, 217);
+    width: 500px;
+    height: max-content;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 10px 14px rgba(124, 114, 255, 0.2)
 }
 
 @media (max-width: 600px) {
