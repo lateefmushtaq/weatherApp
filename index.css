@@ -64,8 +64,10 @@ body::before {
 }
 
 .results {
-    margin-top: 10px;
+    margin-top: 15px;
+    color: #fff;
     display: flex;
+    flex-direction: column;
     gap: 5px;
     background-color: rgb(71, 60, 217);
     width: 500px;
@@ -95,7 +97,8 @@ body::before {
         font-size: 14px;
     }
 
-    .weatherInfo p {
+    .results p {
         font-size: 16px;
+        margin-top: 10px;
     }
 }
