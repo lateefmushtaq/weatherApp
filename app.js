@@ -134,7 +134,7 @@ async function getData() {
 
 
 
-let cities = ['London', 'Berlin', 'Dubai', 'Delhi', 'Budapest', 'Amsterdam']
+let cities = ['Berlin', 'Delhi', 'Amsterdam']
 cities.forEach((city) => { let button = document.createElement('button'); button.innerText = city; button.classList.add('topSearch'); document.getElementById('buttonContainer').appendChild(button);; button.addEventListener('click', () => topSearch(city)); })
 
 function topSearch(cityName) {
