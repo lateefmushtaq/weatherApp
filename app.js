@@ -1,11 +1,21 @@
 let input = document.querySelector('input')
 let button = document.querySelector('button')
-let results = document.querySelector('.results')
+
 function test() {
     console.log(input.value)
 }
 button.addEventListener('click', getData)
-
+async function getTimezone(lat, lon) {
+    try {
+        const response = await fetch(`https://maps.googleapis.com/maps/api/timezone/json?location=${lat},${lon}&timestamp=${Date.now() / 1000}&key=YOUR_API_KEY`);
+        const data = await response.json();
+        const timezoneId = data.timeZoneId;
+        return timezoneId;
+    } catch (error) {
+        console.error('Error:', error);
+        return null;
+    }
+}
 async function getData() {
     let id = input.value
     try {
@@ -16,36 +26,94 @@ async function getData() {
         }
         let weatherData = await response.json()
         const cityWeather = weatherData.main
-        let [deg, speed] = [weatherData.wind.deg, weatherData.wind.speed]
+        let speed = weatherData.wind.speed
         const [sunrise, sunset, countryCode] = [weatherData.sys.sunrise, weatherData.sys.sunset, weatherData.sys.country]
         const visibility = weatherData.visibility
         const firstWeatherObject = weatherData.weather[0];
-        const [main, description] = [firstWeatherObject.main, firstWeatherObject.description]
-        let kelvinTemp = cityWeather.temp
-        let celsiusTemp = kelvinTemp - 273.15;
+        const [description] = [firstWeatherObject.description]
+
         let [lat, lon] = [weatherData.coord.lat, weatherData.coord.lon]
         const [feels_like, humidity, pressure, temp, temp_max, temp_min] = [cityWeather.feels_like, cityWeather.humidity, cityWeather.pressure, cityWeather.temp, cityWeather.temp_max, cityWeather.temp_min]
+        let existingResults = document.querySelector('.results');
+        let existingCoordinates = document.querySelector('.coordinates');
+
+        if (existingResults && existingCoordinates) {
+            existingResults.remove();
+            existingCoordinates.remove();
+        }
+        let results = document.createElement('div')
+        results.classList.add('results')
+        document.body.appendChild(results)
         let city = document.createElement('h3')
         city.innerText = `${weatherData.name} , ${countryCode} `
         results.appendChild(city)
         let overview = document.createElement('h5')
-        overview.innerText = `${main}, ${description}`
+        const iconMap = {
+            'clear sky': 'fas fa-sun',
+            'few clouds': 'fas fa-cloud-sun',
+            'overcast clouds': 'fas fa-cloud',
+            'broken clouds': 'fas fa-cloud',
+            'rain': 'fas fa-cloud-showers-heavy',
+            'light rain': 'fas fa-cloud-rain',
+            'thunderstorm': 'fas fa-bolt',
+            'snow': 'fas fa-snowflake',
+            'haze': 'fas fa-smog'
+        };
+        let tempIcon = 'fas fa-thermometer-half';
+        if ((temp - 273.15) <= 20) {
+            tempIcon = 'fas fa-thermometer-quarter';
+        } else if ((temp - 273.15) > 20) {
+            tempIcon = 'fas fa-thermometer-full';
+        }
+        let weatherIcon = iconMap[description] || 'fas fa-sun';
+        overview.innerHTML = `<i class="${weatherIcon}"></i> ${description.toUpperCase()}`;
+
         results.appendChild(overview)
-        let weather = document.createElement('p')
-        weather.innerText = `Feels Like : ${feels_like - 273.15} °C ,Current Temp : ${temp - 273.15} °C , Max: ${temp_max - 273.15} °C , Min ${temp_min - 273.15} °C`
-        results.appendChild(weather)
-        let otherData = document.createElement('p')
-        otherData.innerText = `Humidity : ${humidity}% , Pressue : ${pressure} hPa , Visibility ${visibility} meters`
-        results.appendChild(otherData)
-        let dayLight = document.createElement('p')
-        dayLight.innerText = `Sunrise: ${new Date(sunrise * 1000).toLocaleTimeString()} am, Sunset : ${new Date(sunset * 1000).toLocaleTimeString()} pm,`
-        results.appendChild(dayLight)
-        let wind = document.createElement('p')
-        wind.innerText = `${deg}° , ${speed}ms`
+        let weatherFL = document.createElement('span')
+        weatherFL.innerHTML = `<i class="${tempIcon}" style="color: #FFD43B;"></i>Feels Like : ${(feels_like - 273.15).toFixed(2)} °C`
+        results.appendChild(weatherFL)
+        let weatherTemp = document.createElement('span')
+        weatherTemp.innerHTML = `<i class="${tempIcon}"></i>Current Temp : ${(temp - 273.15).toFixed(2)} °C `
+        results.appendChild(weatherTemp)
+        let weatherTempMax = document.createElement('span')
+        weatherTempMax.innerHTML = `<i class="${tempIcon}" style="color:#c40808;></i>Max Temp : ${(temp_max - 273.15).toFixed(2)} °C `
+        results.appendChild(weatherTempMax)
+        let weatherTempMin = document.createElement('span')
+        weatherTempMin.innerHTML = `<i class="${tempIcon}"></i>Max Temp : ${(temp_min - 273.15).toFixed(2)} °C `
+        results.appendChild(weatherTempMin)
+        let weatherHumidity = document.createElement('span')
+        weatherHumidity.innerText = `Humidity : ${humidity}% `
+        results.appendChild(weatherHumidity)
+        let weatherPressue = document.createElement('span')
+        weatherPressue.innerText = `Pressue : ${pressure} hPa `
+        results.appendChild(weatherPressue)
+        let weatherVisibility = document.createElement('span')
+        weatherVisibility.innerText = `Visibility ${visibility} m`
+        results.appendChild(weatherVisibility)
+        let sunriseTime = document.createElement('span')
+        sunriseTime.innerHTML = `<i class="fa-solid fa-sun" style="color: #FFD43B;"></i> Sunrise: ${new Date(sunrise * 1000).toLocaleTimeString()} am`
+        results.appendChild(sunriseTime)
+        let sunsetTime = document.createElement('p')
+        sunsetTime.innerHTML = `<i class="fa-regular fa-sun" style="color: #FFD43B;"></i>Sunset: ${new Date(sunset * 1000).toLocaleTimeString()} pm`
+        results.appendChild(sunsetTime)
+
+        let wind = document.createElement('span')
+        wind.innerText = ` Speed: ${speed}ms`
         results.appendChild(wind)
-        let coord = document.createElement('p')
+        let coord = document.createElement('div')
+        coord.classList.add('coordinates')
         coord.innerText = `Latitude: ${lat}, Longitude: ${lon}`;
-        coord.appendChild(coord)
-        results.innerText = ''
+        document.body.appendChild(coord);
+
+        input.value = '';
+
+
+        getTimezone(lat, lon).then(timezoneId => {
+            console.log('Timezone:', timezoneId);
+
+        });
+
+
+
     } catch (e) { console.log(e) }
 }
