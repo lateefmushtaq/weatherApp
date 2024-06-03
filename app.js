@@ -1,13 +1,21 @@
 let input = document.querySelector('input')
 let button = document.querySelector('button')
 
-function test() {
-    console.log(input.value)
-}
+window.onload = function () {
+    if (input.value === '') {
+        button.disabled = true;
+    }
+
+    input.addEventListener('input', function () {
+        button.disabled = input.value === '';
+    });
+};
+
 button.addEventListener('click', getData)
 async function getTimezone(lat, lon) {
+    const API = 'AIzaSyA6MldL7oCao35AJBI4NcXERkYKaLVz14Q'
     try {
-        const response = await fetch(`https://maps.googleapis.com/maps/api/timezone/json?location=${lat},${lon}&timestamp=${Date.now() / 1000}&key=YOUR_API_KEY`);
+        const response = await fetch(`https://maps.googleapis.com/maps/api/timezone/json?location=${lat},${lon}&timestamp=${Date.now() / 1000}&key=${API}`);
         const data = await response.json();
         const timezoneId = data.timeZoneId;
         return timezoneId;
@@ -17,12 +25,15 @@ async function getTimezone(lat, lon) {
     }
 }
 async function getData() {
+    if (input.value === '') {
+        button.disabled = true;
+    }
     let id = input.value
     try {
         let response = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${id}&APPID=7f12b9f7637879bc79cddc5739293ac2`
         );
         if (!response.ok) {
-            alert(response.status)
+            alert(`${response.status} page not found`)
         }
         let weatherData = await response.json()
         const cityWeather = weatherData.main
@@ -41,6 +52,7 @@ async function getData() {
             existingResults.remove();
             existingCoordinates.remove();
         }
+
         let results = document.createElement('div')
         results.classList.add('results')
         document.body.appendChild(results)
@@ -98,11 +110,11 @@ async function getData() {
         results.appendChild(sunsetTime)
 
         let wind = document.createElement('span')
-        wind.innerText = ` Speed: ${speed}ms`
+        wind.innerHTML = `<i class="fa-solid fa-wind"></i> Speed: ${speed}ms`
         results.appendChild(wind)
         let coord = document.createElement('div')
         coord.classList.add('coordinates')
-        coord.innerText = `Latitude: ${lat}, Longitude: ${lon}`;
+        coord.innerText = `Latitude: ${lat} Longitude: ${lon}`;
         document.body.appendChild(coord);
 
         input.value = '';
@@ -111,9 +123,26 @@ async function getData() {
         getTimezone(lat, lon).then(timezoneId => {
             console.log('Timezone:', timezoneId);
 
+            const currentTime = new Date().toLocaleTimeString("en-US", { timeZone: timezoneId });
+            console.log('Current Time:', currentTime);
+            let timeNow = document.createElement('span')
+            timeNow.innerHTML = `<i class="fa-regular fa-clock"></i> ${currentTime}`;
+            results.appendChild(timeNow)
         });
-
-
-
     } catch (e) { console.log(e) }
 }
+
+
+
+let cities = ['London', 'Berlin', 'Dubai', 'Delhi', 'Budapest', 'Amsterdam']
+cities.forEach((city) => { let button = document.createElement('button'); button.innerText = city; button.classList.add('topSearch'); document.getElementById('buttonContainer').appendChild(button);; button.addEventListener('click', () => topSearch(city)); })
+
+function topSearch(cityName) {
+    input.value = cityName
+    getData()
+    input.value = ''
+
+}
+
+
+
