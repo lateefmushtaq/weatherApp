@@ -1,5 +1,5 @@
-let input = document.querySelector('input')
-let button = document.querySelector('button')
+const input = document.querySelector('input')
+const button = document.querySelector('button')
 
 window.onload = function () {
     if (input.value === '') {
@@ -20,7 +20,7 @@ async function getTimezone(lat, lon) {
         const timezoneId = data.timeZoneId;
         return timezoneId;
     } catch (error) {
-        console.error('Error:', error);
+
         return null;
     }
 }
@@ -79,7 +79,6 @@ async function getData() {
         }
         let weatherIcon = iconMap[description] || 'fas fa-sun';
         overview.innerHTML = `<i class="${weatherIcon}"></i> ${description.toUpperCase()}`;
-
         results.appendChild(overview)
         let weatherFL = document.createElement('span')
         weatherFL.innerHTML = `<i class="${tempIcon}" style="color: #FFD43B;"></i>Feels Like : ${(feels_like - 273.15).toFixed(2)} °C`
@@ -116,23 +115,15 @@ async function getData() {
         coord.classList.add('coordinates')
         coord.innerText = `Latitude: ${lat} Longitude: ${lon}`;
         document.body.appendChild(coord);
-
         input.value = '';
-
-
         getTimezone(lat, lon).then(timezoneId => {
-            console.log('Timezone:', timezoneId);
-
             const currentTime = new Date().toLocaleTimeString("en-US", { timeZone: timezoneId });
-            console.log('Current Time:', currentTime);
             let timeNow = document.createElement('span')
             timeNow.innerHTML = `<i class="fa-regular fa-clock"></i> ${currentTime}`;
             results.appendChild(timeNow)
         });
-    } catch (e) { console.log(e) }
+    } catch (e) { return null }
 }
-
-
 
 let cities = ['Berlin', 'Delhi', 'Amsterdam']
 cities.forEach((city) => { let button = document.createElement('button'); button.innerText = city; button.classList.add('topSearch'); document.getElementById('buttonContainer').appendChild(button);; button.addEventListener('click', () => topSearch(city)); })
